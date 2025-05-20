@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Тренажёр Таблицы Умножения</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      min-height: 100vh;
+      background: #f9fafb;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .card {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .question {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .option {
+      background: #e2e8f0;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .option:hover {
+      background: #cbd5e1;
+    }
+
+    .option.correct {
+      background: #4ade80;
+      color: white;
+    }
+
+    .option.wrong {
+      background: #f87171;
+      color: white;
+    }
+
+    .score {
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1e40af;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="score">Правильно: <span id="correct">0</span> | Ошибок: <span id="wrong">0</span></div>
+    <div class="question" id="question">2 × 6 = ?</div>
+    <div class="options" id="options"></div>
+    <button id="nextBtn" onclick="nextQuestion()" style="display:none;">Следующий вопрос</button>
+  </div>
+
+  <script>
+    let a = 0, b = 0, answer = 0;
+    let correctCount = 0, wrongCount = 0;
+    const correctEl = document.getElementById("correct");
+    const wrongEl = document.getElementById("wrong");
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function generateOptions(correctAnswer) {
+      const options = new Set([correctAnswer]);
+      while (options.size < 8) {
+        options.add(correctAnswer + randomInt(-10, 10));
+      }
+      return shuffle([...options]);
+    }
+
+    function renderQuestion() {
+      a = randomInt(1, 10);
+      b = randomInt(1, 10);
+      answer = a * b;
+      questionEl.textContent = `${a} × ${b} = ?`;
+      const choices = generateOptions(answer);
+
+      optionsEl.innerHTML = '';
+      choices.forEach(option => {
+        const btn = document.createElement("div");
+        btn.className = "option";
+        btn.textContent = option;
+        btn.onclick = () => handleAnswer(btn, option);
+        optionsEl.appendChild(btn);
+      });
+
+      nextBtn.style.display = "none";
+    }
+
+    function handleAnswer(button, selected) {
+      const allOptions = document.querySelectorAll(".option");
+      allOptions.forEach(opt => opt.onclick = null); // отключаем повторный выбор
+
+      if (selected === answer) {
+        button.classList.add("correct");
+        correctCount++;
+        correctEl.textContent = correctCount;
+      } else {
+        button.classList.add("wrong");
+        wrongCount++;
+        wrongEl.textContent = wrongCount;
+        // выделим правильный
+        allOptions.forEach(opt => {
+          if (parseInt(opt.textContent) === answer) {
+            opt.classList.add("correct");
+          }
+        });
+      }
+
+      nextBtn.style.display = "block";
+    }
+
+    function nextQuestion() {
+      renderQuestion();
+    }
+
+    renderQuestion();
+  </script>
+</body>
+</html>
